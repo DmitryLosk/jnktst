@@ -5,7 +5,7 @@ pipeline {
         IMAGE = 'nginx:latest'
         C_NAME = 'nginxjenk'
         PORT_MP = '9889:80'
-        EMAIL_RECIPIENT = 'dts2000@ya.ru'
+        EMAIL_RECIPIENT = 'my_email@domain.ru'
     }
 
     stages {
@@ -28,6 +28,7 @@ pipeline {
             steps {
                 script {
                     def response = sh(script: "curl -o /dev/null -s -w '%{http_code}' http://localhost:9889", returnStdout: true).trim()
+                    echo "Ответ код $response"
                     if (response != '200') {
                         error "HTTP response code is not 200, but ${response}"
                     }
@@ -40,6 +41,8 @@ pipeline {
                 script {
                     def local_md5 = sh(script: "md5sum index.html | awk '{ print \$1 }'", returnStdout: true).trim()
                     def container_md5 = sh(script: "curl -s http://localhost:9889/index.html | md5sum | awk '{ print \$1 }'", returnStdout: true).trim()
+                    echo "$local_md5"
+                    echo "$container_md5"
                     if (local_md5 != container_md5) {
                         error "MD5 sums do not match! Local: ${local_md5}, Container: ${container_md5}"
                     }
@@ -60,7 +63,7 @@ pipeline {
             echo 'Pipeline completed successfully.'
             script {
                 sh """
-echo "Subject: Jenkins Build Successful: ${currentBuild.fullDisplayName}\n\nGood news! The Jenkins build ${currentBuild.fullDisplayName} completed successfully.\n\nCheck the details at: ${env.BUILD_URL}" | sendmail ${EMAIL_RECIPIENT}
+echo "Subject: Build Successful: ${currentBuild.fullDisplayName}\n\nGood news! Build ${currentBuild.fullDisplayName} completed successfully.\n\nDetails at: ${env.BUILD_URL}" | sendmail ${EMAIL_RECIPIENT}
 """
             }
         }
@@ -68,7 +71,7 @@ echo "Subject: Jenkins Build Successful: ${currentBuild.fullDisplayName}\n\nGood
             echo 'Pipeline failed.'
             script {
                 sh """
-echo "Subject: Jenkins Build Failed: ${currentBuild.fullDisplayName}\n\nUnfortunately, the Jenkins build ${currentBuild.fullDisplayName} failed.\n\nCheck the details at: ${env.BUILD_URL}" | sendmail ${EMAIL_RECIPIENT}
+echo "Subject: Build Failed: ${currentBuild.fullDisplayName}\n\nUnfortunately, Build ${currentBuild.fullDisplayName} failed.\n\nDetails at: ${env.BUILD_URL}" | sendmail ${EMAIL_RECIPIENT}
 """
             }
         }
