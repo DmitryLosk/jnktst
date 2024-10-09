@@ -51,7 +51,7 @@ pipeline {
     post {
         always {
             script {
-                sh "sudo apt-get install sendmail"
+                sh "sudo apt-get -y install sendmail"
                 sh "docker stop ${C_NAME} || true"
                 sh "docker rm -f ${C_NAME} || true"
             }
