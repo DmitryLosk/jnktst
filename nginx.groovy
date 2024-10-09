@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE = 'nginx:latest'
-        C_NAME = 'nginx_test'
+        C_NAME = 'nginxjenk'
         PORT_MP = '9889:80'
         EMAIL_RECIPIENT = 'dts2000@ya.ru'
     }
